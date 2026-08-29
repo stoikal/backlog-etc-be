@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(schema = "user", name = "users")
+@Table(schema = "identity", name = "users")
 public class User {
 
     @Id
@@ -22,7 +22,7 @@ public class User {
     private String password;
 
     @Column(nullable = false, updatable = false)
-    private final LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
