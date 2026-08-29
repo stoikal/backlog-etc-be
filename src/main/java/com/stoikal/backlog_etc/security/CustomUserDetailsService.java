@@ -1,7 +1,6 @@
 package com.stoikal.backlog_etc.security;
 
 import com.stoikal.backlog_etc.repository.UserRepository;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,9 +18,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return userRepository.findByEmail(email)
-                .map(u -> User.withUsername(u.getEmail())
-                        .password(u.getPassword())
-                        .build())
+                .map(u -> new AuthUser(u.getId(), u.getEmail(), u.getPassword()))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
     }
 }

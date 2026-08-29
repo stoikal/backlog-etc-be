@@ -7,10 +7,10 @@ import com.stoikal.backlog_etc.entity.RefreshToken;
 import com.stoikal.backlog_etc.entity.User;
 import com.stoikal.backlog_etc.repository.RefreshTokenRepository;
 import com.stoikal.backlog_etc.repository.UserRepository;
+import com.stoikal.backlog_etc.security.AuthUser;
 import com.stoikal.backlog_etc.security.JwtUtil;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -90,8 +90,7 @@ public class AuthService {
     }
 
     private AuthResult generateAuthResult(User user) {
-        UserDetails userDetails = new org.springframework.security.core.userdetails.User(
-                user.getEmail(), user.getPassword(), java.util.Collections.emptyList());
+        AuthUser userDetails = new AuthUser(user.getId(), user.getEmail(), user.getPassword());
 
         String accessToken = jwtUtil.generateAccessToken(userDetails);
         String rawRefreshToken = jwtUtil.generateRefreshToken(userDetails);

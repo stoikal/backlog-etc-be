@@ -4,12 +4,12 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Base64;
 import java.util.Date;
+import java.util.UUID;
 
 @Component
 public class JwtUtil {
@@ -26,20 +26,22 @@ public class JwtUtil {
         this.refreshExpiration = refreshExpiration;
     }
 
-    public String generateAccessToken(UserDetails userDetails) {
+    public String generateAccessToken(AuthUser userDetails) {
         return Jwts.builder()
                 .subject(userDetails.getUsername())
                 .claim("type", "access")
+                .claim("user_id", userDetails.getUserId().toString())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + accessExpiration))
                 .signWith(key)
                 .compact();
     }
 
-    public String generateRefreshToken(UserDetails userDetails) {
+    public String generateRefreshToken(AuthUser userDetails) {
         return Jwts.builder()
                 .subject(userDetails.getUsername())
                 .claim("type", "refresh")
+                .claim("user_id", userDetails.getUserId().toString())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + refreshExpiration))
                 .signWith(key)
@@ -48,6 +50,10 @@ public class JwtUtil {
 
     public String extractEmail(String token) {
         return parseClaims(token).getSubject();
+    }
+
+    public UUID extractUserId(String token) {
+        return UUID.fromString(parseClaims(token).get("user_id", String.class));
     }
 
     public boolean isValid(String token) {
