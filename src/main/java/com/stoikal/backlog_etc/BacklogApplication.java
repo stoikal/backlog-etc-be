@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class BacklogApplication {
 
 	public static void main(String[] args) {
+
 		SpringApplication.run(BacklogApplication.class, args);
 	}
 
