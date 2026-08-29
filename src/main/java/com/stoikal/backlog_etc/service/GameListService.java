@@ -39,14 +39,23 @@ public class GameListService {
         "created_at", "createdAt"
     );
 
+    private static final Set<String> PROGRESS_SORT_KEYS = Set.of("finished", "progress");
+
     public ListPageResponse getUserLists(UUID userId, int page, int limit, String sortBy, String sortDir) {
-        String field = SORT_MAP.getOrDefault(sortBy, sortBy != null ? sortBy : "createdAt");
-        Sort sort = Sort.by(
-                "desc".equalsIgnoreCase(sortDir) ? Sort.Direction.DESC : Sort.Direction.ASC,
-                field
-        );
-        Pageable pageable = PageRequest.of(page - 1, limit, sort);
-        Page<GameList> listPage = gameListRepository.findByUserId(userId, pageable);
+        Page<GameList> listPage;
+
+        if (sortBy != null && PROGRESS_SORT_KEYS.contains(sortBy)) {
+            Pageable pageable = PageRequest.of(page - 1, limit);
+            listPage = gameListRepository.findByUserIdOrderedByProgress(userId, pageable);
+        } else {
+            String field = SORT_MAP.getOrDefault(sortBy, sortBy != null ? sortBy : "createdAt");
+            Sort sort = Sort.by(
+                    "desc".equalsIgnoreCase(sortDir) ? Sort.Direction.DESC : Sort.Direction.ASC,
+                    field
+            );
+            Pageable pageable = PageRequest.of(page - 1, limit, sort);
+            listPage = gameListRepository.findByUserId(userId, pageable);
+        }
 
         Set<Integer> gameIds = new HashSet<>();
         Map<UUID, List<ListItem>> itemsByListId = new HashMap<>();
