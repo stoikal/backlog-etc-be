@@ -16,18 +16,20 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
-public class GameListService {
+public class PlaylistService {
 
     private final GameListRepository gameListRepository;
     private final ListItemRepository listItemRepository;
     private final GameStatusRepository gameStatusRepository;
 
-    public GameListService(GameListRepository gameListRepository,
+    public PlaylistService(GameListRepository gameListRepository,
                             ListItemRepository listItemRepository,
                             GameStatusRepository gameStatusRepository) {
         this.gameListRepository = gameListRepository;
@@ -52,7 +54,7 @@ public class GameListService {
             Sort sort = Sort.by(
                     "desc".equalsIgnoreCase(sortDir) ? Sort.Direction.DESC : Sort.Direction.ASC,
                     field
-            );
+            ).and(Sort.by(Sort.Direction.ASC, "id"));
             Pageable pageable = PageRequest.of(page - 1, limit, sort);
             listPage = gameListRepository.findByUserId(userId, pageable);
         }
@@ -72,9 +74,18 @@ public class GameListService {
                 .map(gl -> {
                     List<ListItemDto> itemDtos = itemsByListId.getOrDefault(gl.getId(), List.of())
                             .stream()
-                            .map(item -> new ListItemDto(
+                            .map(item -> {
+                            Long releaseTs = item.getGame().getFirstReleaseDate();
+                            Integer year = releaseTs != null
+                                    ? Instant.ofEpochSecond(releaseTs).atZone(ZoneId.of("UTC")).getYear()
+                                    : null;
+                            return new ListItemDto(
                                     item.getGame().getName(),
-                                    statusByGameId.getOrDefault(item.getGameId(), "todo")))
+                                    statusByGameId.getOrDefault(item.getGameId(), "todo"),
+                                    year);
+                        })
+                            .sorted(Comparator.comparing((ListItemDto dto) -> "finished".equals(dto.getStatus()) ? 1 : 0)
+                                    .thenComparing(ListItemDto::getName))
                             .toList();
                     return new ListDto(gl.getId(), gl.getTitle(), itemDtos);
                 })

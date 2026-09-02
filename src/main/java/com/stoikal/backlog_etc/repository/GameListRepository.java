@@ -18,7 +18,8 @@ public interface GameListRepository extends JpaRepository<GameList, UUID> {
         WHERE gl.user_id = :userId
         GROUP BY gl.id, gl.user_id, gl.title, gl.created_at
         ORDER BY COUNT(CASE WHEN gs.status = 'finished' THEN 1 END) ASC,
-                 COUNT(CASE WHEN gs.status IS NULL OR gs.status != 'finished' THEN 1 END) DESC
+                 COUNT(CASE WHEN gs.status IS NULL OR gs.status != 'finished' THEN 1 END) DESC,
+                 gl.id ASC
         """,
         countQuery = "SELECT COUNT(*) FROM gaming.lists WHERE user_id = :userId",
         nativeQuery = true)
