@@ -405,7 +405,7 @@ jwt.cookie-secure=${COOKIE_SECURE:false}
 | Column | Type | Notes |
 |--------|------|-------|
 | id | UUID (PK) | `@GeneratedValue(Strategy.UUID)` |
-| user | User (ManyToOne) | `@ManyToOne(fetch = LAZY)`, `@JoinColumn(name = "user_id")` |
+| user | User (ManyToOne) | `@ManyToOne(fetch = LAZY)`, `@JoinColumn(name = "id_user")` |
 | tokenHash | String | `@Column(nullable = false)` |
 | expiresAt | LocalDateTime | `@Column(nullable = false)` |
 | createdAt | LocalDateTime | |
