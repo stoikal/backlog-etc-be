@@ -26,7 +26,7 @@ CREATE TABLE gaming.platforms (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
     name TEXT,
     slug TEXT,
-    category SMALLINT REFERENCES gaming.platform_categories(id),
+    id_platform_category SMALLINT REFERENCES gaming.platform_categories(id),
     logo_url TEXT,
     url TEXT,
     alternative_name TEXT,
@@ -35,14 +35,14 @@ CREATE TABLE gaming.platforms (
 
 CREATE TABLE gaming.games_genres (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-    game_id INTEGER NOT NULL REFERENCES gaming.games(id),
-    genre_id SMALLINT NOT NULL REFERENCES gaming.genres(id),
-    PRIMARY KEY (game_id, genre_id)
+    id_game INTEGER NOT NULL REFERENCES gaming.games(id),
+    id_genre SMALLINT NOT NULL REFERENCES gaming.genres(id),
+    PRIMARY KEY (id_game, id_genre)
 );
 
 CREATE TABLE gaming.games_platforms (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-    game_id INTEGER NOT NULL REFERENCES gaming.games(id),
-    platform_id SMALLINT NOT NULL REFERENCES gaming.platforms(id),
-    PRIMARY KEY (game_id, platform_id)
+    id_game INTEGER NOT NULL REFERENCES gaming.games(id),
+    id_platform SMALLINT NOT NULL REFERENCES gaming.platforms(id),
+    PRIMARY KEY (id_game, id_platform)
 );
