@@ -2,6 +2,7 @@ package com.stoikal.backlog_etc.controller;
 
 import com.stoikal.backlog_etc.config.JwtConfig;
 import com.stoikal.backlog_etc.dto.AuthResponse;
+import com.stoikal.backlog_etc.dto.LoginRequest;
 import com.stoikal.backlog_etc.dto.RegisterRequest;
 import com.stoikal.backlog_etc.service.AuthService;
 import com.stoikal.backlog_etc.service.TokenPair;
@@ -33,6 +34,14 @@ public class AuthController {
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request,
                                                  HttpServletResponse response) {
         TokenPair tokenPair = authService.register(request);
+        addRefreshTokenCookie(response, tokenPair.refreshToken());
+        return ResponseEntity.ok(new AuthResponse(tokenPair.accessToken()));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request,
+                                              HttpServletResponse response) {
+        TokenPair tokenPair = authService.login(request);
         addRefreshTokenCookie(response, tokenPair.refreshToken());
         return ResponseEntity.ok(new AuthResponse(tokenPair.accessToken()));
     }

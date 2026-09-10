@@ -1,6 +1,7 @@
 package com.stoikal.backlog_etc.service;
 
 import com.stoikal.backlog_etc.config.JwtConfig;
+import com.stoikal.backlog_etc.dto.LoginRequest;
 import com.stoikal.backlog_etc.dto.RegisterRequest;
 import com.stoikal.backlog_etc.entity.RefreshToken;
 import com.stoikal.backlog_etc.entity.User;
@@ -8,6 +9,8 @@ import com.stoikal.backlog_etc.repository.RefreshTokenRepository;
 import com.stoikal.backlog_etc.repository.UserRepository;
 import com.stoikal.backlog_etc.security.JwtTokenProvider;
 import jakarta.transaction.Transactional;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -23,17 +26,20 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtConfig jwtConfig;
 
     public AuthService(UserRepository userRepository,
                        RefreshTokenRepository refreshTokenRepository,
+                       AuthenticationManager authenticationManager,
                        PasswordEncoder passwordEncoder,
                        JwtTokenProvider jwtTokenProvider,
                        JwtConfig jwtConfig) {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
+        this.authenticationManager = authenticationManager;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
         this.jwtConfig = jwtConfig;
@@ -54,7 +60,11 @@ public class AuthService {
         return generateTokenPair(user);
     }
 
-
+    public TokenPair login(LoginRequest request) {
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.email(), request.password()));
+        User user = userRepository.findByEmail(request.email()).orElseThrow();
+        return generateTokenPair(user);
+    }
 
     private TokenPair generateTokenPair(User user) {
         String accessToken = jwtTokenProvider.generateAccessToken(user.getEmail());
