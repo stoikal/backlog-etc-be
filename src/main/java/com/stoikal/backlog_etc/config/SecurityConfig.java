@@ -30,6 +30,14 @@ public class SecurityConfig {
 
     private final UserDetailsServiceImpl userDetailsService;
 
+    private record PublicRoute(HttpMethod method, String pattern) {}
+
+    private static final List<PublicRoute> PUBLIC_ROUTES = List.of(
+            new PublicRoute(HttpMethod.POST, "/api/v1/auth/**"),
+            new PublicRoute(HttpMethod.GET, "/healthz"),
+            new PublicRoute(HttpMethod.GET, "/error")
+    );
+
     public SecurityConfig(UserDetailsServiceImpl userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
@@ -50,11 +58,17 @@ public class SecurityConfig {
                         ((request, response, authException) ->
                                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized"))
                 ))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
-                        .requestMatchers("/error").permitAll()
-                        .anyRequest().authenticated()
-                )
+                .authorizeHttpRequests(auth -> {
+                    for (PublicRoute route : PUBLIC_ROUTES) {
+                        if (route.method() == null) {
+                            auth.requestMatchers(route.pattern()).permitAll();
+                        } else {
+                            auth.requestMatchers(route.method(), route.pattern()).permitAll();
+                        }
+                    }
+
+                    auth.anyRequest().authenticated();
+                })
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
