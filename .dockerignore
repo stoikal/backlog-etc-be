@@ -1,0 +1,10 @@
+.git
+.gitnexus
+.gitattributes
+.gitignore
+.claude
+.idea
+target
+.env
+.env.example
+*.md
